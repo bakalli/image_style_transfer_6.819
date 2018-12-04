@@ -110,6 +110,7 @@ def _get_files(img_dir):
 
     
 def main():
+    print("Started training: \n")
     parser = build_parser()
     options = parser.parse_args()
     check_opts(options)
