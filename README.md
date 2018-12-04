@@ -2,3 +2,6 @@
 
 # Color mapping methods 
 Paper explaining 3 methods for color mapping: https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.12671
+
+# example implementation 
+https://github.com/lengstrom/fast-style-transfer
