@@ -590,7 +590,7 @@ def stylize(content_img, style_imgs, init_img, frame=None):
     output_img = sess.run(net['input'])
     
     if args.original_colors:
-      output_img = convert_to_original_colors(np.copy(content_img), output_img)
+      output_img = lum_transfer(np.copy(content_img), output_img)
 
     if args.video:
       write_video_output(frame, output_img)
@@ -790,7 +790,9 @@ def warp_image(src, flow):
     interpolation=cv2.INTER_CUBIC, borderMode=cv2.BORDER_TRANSPARENT)
   return dst
 
-def convert_to_original_colors(content_img, stylized_img):
+''' COLOR MAPPING METHODS '''
+
+def lum_transfer(content_img, stylized_img):
   content_img  = postprocess(content_img)
   stylized_img = postprocess(stylized_img)
   if args.color_convert_type == 'yuv':
@@ -813,6 +815,51 @@ def convert_to_original_colors(content_img, stylized_img):
   dst = cv2.cvtColor(merged, inv_cvt_type).astype(np.float32)
   dst = preprocess(dst)
   return dst
+
+
+# match two images using the Monge-Kantorovitch transform
+def histogram_match(cont_img_cvar, sty_img_cvar):
+    cont_img = cont_img_cvar.data.copy()
+    sty_img = sty_img_cvar.data.copy()
+
+    # roll back to standard arrangement
+    cont_img = np.rollaxis(np.squeeze(cont_img, 0), 0, 3)
+    sty_img = np.rollaxis(np.squeeze(sty_img, 0), 0, 3)
+
+    # compute row means
+    cont_mu = np.mean(cont_img, axis=(0, 1))
+    sty_mu = np.mean(sty_img, axis=(0, 1))
+
+    # compute covariance matrix
+    cont_sigma = np.cov(np.concatenate(cont_img), rowvar=False, bias=True)
+    sty_sigma = np.cov(np.concatenate(sty_img), rowvar=False, bias=True)
+
+    # eigendecomposition for square roots
+    sty_q, sty_l = sp.linalg.eig(sty_sigma)
+    sty_q = np.diag(np.sqrt(sty_q))
+    sty_sigma_sqrtm = sty_l.dot(sty_q).dot(sty_l.T)
+    sty_sigma_sqrtm_inv = np.linalg.inv(sty_sigma_sqrtm)
+
+    cont_sty_cov = sty_sigma_sqrtm.dot(cont_sigma).dot(sty_sigma_sqrtm)
+    cs_q, cs_l = sp.linalg.eig(cont_sty_cov)
+    cs_q = np.diag(np.sqrt(cs_q))
+    cs_sqrtm = cs_l.dot(cs_q).dot(cs_l.T)
+
+    # color matching transformation
+    a = sty_sigma_sqrtm_inv.dot(cs_sqrtm).dot(sty_sigma_sqrtm_inv)
+    sty_img_col = np.add(np.dot(sty_img - sty_mu, a.T), cont_mu).real
+
+    # normalize
+    sty_img_col = np.ceil(255.0 * normalize(sty_img_col))
+
+    # convert to a Chainer Variables
+    sty_img_cm_cvar = Variable(sty_img_col)
+
+    # transform image back to bc01
+    sty_img_cm_cvar = F.rollaxis(sty_img_cm_cvar, 2, 0)[np.newaxis, ...]
+
+    return sty_img_cm_cvar
+
 
 def render_single_image():
   content_img = get_content_image(args.content_img)
