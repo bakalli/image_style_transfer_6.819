@@ -1,6 +1,6 @@
 image_name: result
 content: city.jpg
-styles[0]: 1.0 * seated-nude.jpg
+styles[0]: 1.0 * starry-night.jpg
 init_type: content
 content_weight: 5.0
 style_weight: 10000.0
