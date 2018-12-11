@@ -1,5 +1,5 @@
 image_name: result
-content: jona_sule.JPG
+content: city.jpg
 styles[0]: 1.0 * kandinsky.jpg
 init_type: content
 content_weight: 5.0
