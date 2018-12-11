@@ -1,6 +1,6 @@
 image_name: result
 content: jona_sule.JPG
-styles[0]: 1.0 * seated-nude.jpg
+styles[0]: 1.0 * kandinsky.jpg
 init_type: content
 content_weight: 5.0
 style_weight: 10000.0
