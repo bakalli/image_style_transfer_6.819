@@ -1,6 +1,6 @@
 image_name: result
-content: heather.jpeg
-styles[0]: 1.0 * chuck-close.JPG
+content: smoky-arber.JPG
+styles[0]: 1.0 * seated-nude.jpg
 init_type: content
 content_weight: 5.0
 style_weight: 10000.0
