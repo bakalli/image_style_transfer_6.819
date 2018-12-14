@@ -1,6 +1,6 @@
 image_name: result
-content: smoky-arber.JPG
-styles[0]: 1.0 * kandinsky.jpg
+content: flower-arber.JPG
+styles[0]: 1.0 * woman-with-hat-matisse.jpg
 init_type: content
 content_weight: 5.0
 style_weight: 10000.0
